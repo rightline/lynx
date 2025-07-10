@@ -339,7 +339,8 @@ void ElementContainer::UpdateLayout(float left, float top,
           element_->paddings().data(), element_->margins().data(),
           element_->borders().data(), nullptr,
           element_->is_sticky() ? element_->sticky_positions().data() : nullptr,
-          element_->max_height(), element_->NodeIndex());
+          element_->max_height(), element_->NodeIndex(),
+          element_->IsDisplayNone());
     }
     if (need_update_impl || props_changed_) {
       element_->painting_context()->OnNodeReady(element_->impl_id());

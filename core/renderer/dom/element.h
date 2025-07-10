@@ -255,6 +255,7 @@ class Element : public lepus::RefCounted, public event::EventTarget {
   bool GetArchType() { return arch_type_; }
   bool IsRadonArch() const { return arch_type_ == RadonArch; }
   bool IsFiberArch() const { return arch_type_ == FiberArch; }
+  inline bool IsDisplayNone() const { return is_display_none_; }
 
   void UpdateLayout(float left, float top, float width, float height,
                     const std::array<float, 4>& paddings,
@@ -262,6 +263,13 @@ class Element : public lepus::RefCounted, public event::EventTarget {
                     const std::array<float, 4>& borders,
                     const std::array<float, 4>* sticky_positions,
                     float max_height);
+
+  void UpdateLayout(float left, float top, float width, float height,
+                    const std::array<float, 4>& paddings,
+                    const std::array<float, 4>& margins,
+                    const std::array<float, 4>& borders,
+                    const std::array<float, 4>* sticky_positions,
+                    float max_height, bool is_display_none);
   // Used to update child element's left and top value from list element. The
   // another overloaded function is used to update layout info from starlight,
   // but if the element is list's child, the left and top's value are always 0.
@@ -811,6 +819,8 @@ class Element : public lepus::RefCounted, public event::EventTarget {
   bool enable_component_layout_only_{true};
 
   bool enable_layout_in_element_mode_{false};
+
+  bool is_display_none_{false};
 
   starlight::DirectionType direction_ =
       starlight::DefaultLayoutStyle::SL_DEFAULT_DIRECTION;
