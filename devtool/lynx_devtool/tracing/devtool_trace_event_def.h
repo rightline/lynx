@@ -6,6 +6,7 @@
 #define DEVTOOL_LYNX_DEVTOOL_TRACING_DEVTOOL_TRACE_EVENT_DEF_H_
 
 #include "core/base/lynx_trace_categories.h"
+#include "devtool/base_devtool/native/tracing/basedevtool_trace_event_def.h"
 
 #if ENABLE_TRACE_PERFETTO || ENABLE_TRACE_SYSTRACE
 
@@ -41,6 +42,14 @@ inline constexpr const char* const FRAME_TRACE_SERVICE_BEGIN_FRAME =
 inline constexpr const char* const FRAME_TRACE_SERVICE_DRAW_FRAME = "DrawFrame";
 inline constexpr const char* const INSTANCE_COUNTER_TRACE_UPDATE_COUNTERS =
     "UpdateCounters";
-#endif  // #if ENABLE_TRACE_PERFETTO || ENABLE_TRACE_SYSTRACE
 
+#define TRACE_EVENT_WITH_METHOD_NAME(m)                                \
+  std::string message_name =                                           \
+      std::string("DispatchJSMessage.") + m[kKeyMethod].asString();    \
+  TRACE_EVENT(LYNX_TRACE_CATEGORY_DEVTOOL, message_name.c_str(), "id", \
+              m[kKeyId].asInt())
+
+#else  // #if ENABLE_TRACE_PERFETTO || ENABLE_TRACE_SYSTRACE
+#define TRACE_EVENT_WITH_METHOD_NAME(m)
+#endif
 #endif  // DEVTOOL_LYNX_DEVTOOL_TRACING_DEVTOOL_TRACE_EVENT_DEF_H_
