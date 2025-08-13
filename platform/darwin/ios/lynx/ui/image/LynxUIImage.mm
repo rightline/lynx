@@ -45,6 +45,16 @@ typedef NS_ENUM(NSInteger, LynxResizeMode) {
   LynxResizeModeCenter = UIViewContentModeCenter
 };
 
+typedef NS_ENUM(NSInteger, LynxImageOrigin) {
+  LynxImageUnknown = 1,
+  LynxImageNetwork = 2,
+  LynxImageDisk = 3,
+  LynxImageMemoryEncoded = 4,
+  LynxImageMemoryDecoded = 5,
+  LynxImageLocal = 6,  /// local file or base64
+  LynxImageMax = 7,    /// reserved field
+};
+
 #pragma mark LynxURL
 
 @interface LynxUIImageDrawParameter : NSObject
@@ -150,6 +160,7 @@ LYNX_REGISTER_SHADOW_NODE("image")
 @property(nonatomic) BOOL autoPlay;
 @property(nonatomic) UIColor* tintColor;
 @property(nonatomic) BOOL enableExtraLoadInfo;
+@property(nonatomic) BOOL enableReportInfo;
 @property(nonatomic, assign) BOOL skipRedirection;
 @property(nonatomic, assign) BOOL enableImageSR;
 @property(nonatomic, assign) BOOL enableFadeIn;
@@ -195,6 +206,7 @@ LYNX_REGISTER_UI("image")
   _enableImageAsyncLayout = [LynxEnv.sharedInstance enableImageAsyncLayout];
   _frameCacheAutomatically = LynxBooleanOptionUnset;
   _superResolutionScale = 0.0;
+  _enableReportInfo = false;
 }
 
 - (void)freeMemoryCache {
@@ -691,7 +703,14 @@ UIEdgeInsets LynxRoundInsetsToPixel(UIEdgeInsets edgeInsets) {
         [strongSelf addReportInfo:requestUrl];
         [[LynxImageLoader imageService] appendExtraImageLoadDetailForEvent:image
                                                             originalDetail:requestUrl.reportInfo];
-        if (strongSelf.enableExtraLoadInfo) {
+        if (strongSelf.enableReportInfo) {
+          NSMutableDictionary* bindLoad =
+              [strongSelf createReportInfo:requestUrl isNewImage:[strongSelf shouldUseNewImage]];
+          [strongSelf.context.eventEmitter
+              dispatchCustomEvent:[[LynxDetailEvent alloc] initWithName:LynxImageEventLoad
+                                                             targetSign:strongSelf.sign
+                                                                 detail:bindLoad]];
+        } else if (strongSelf.enableExtraLoadInfo) {
           [strongSelf.context.eventEmitter
               dispatchCustomEvent:[[LynxDetailEvent alloc] initWithName:LynxImageEventLoad
                                                              targetSign:strongSelf.sign
@@ -905,6 +924,47 @@ UIEdgeInsets LynxRoundInsetsToPixel(UIEdgeInsets edgeInsets) {
   if (self.context.devtoolEnabled) {
     [[LynxMemoryListener shareInstance] uploadImageInfo:reportUrl.reportInfo];
   }
+}
+
+- (NSMutableDictionary*)createReportInfo:(LynxURL*)reportUrl isNewImage:(BOOL)newImage {
+  LynxImageOrigin origin = LynxImageUnknown;
+  if (newImage) {
+    NSNumber* fromNum = reportUrl.resourceInfo[@"from"] ?: @(-1);
+    NSInteger from = [fromNum integerValue];
+    if (from == -1) {  // unknown
+      if (((NSNumber*)reportUrl.resourceInfo[@"isBase64"]).boolValue) {
+        origin = LynxImageLocal;
+      } else if (![reportUrl.resourceInfo[@"res_from"] isEqualToString:@"cdn"]) {
+        origin = LynxImageLocal;
+      }
+    } else if (from == 0) {
+      origin = LynxImageNetwork;
+    } else if (from == 2) {
+      origin = LynxImageDisk;  // disk
+    } else if (from == 1) {
+      origin = LynxImageMemoryDecoded;  // LYNX_MEMORY_DECODED
+    } else if (from == 3) {
+      origin = LynxImageMemoryEncoded;  // LYNX_MEMORY_ENCODED
+    } else {
+      origin = LynxImageMax;
+    }
+  }
+
+  NSMutableDictionary* reportInfo = [NSMutableDictionary dictionary];
+  NSDate* completeRequestTime = [NSDate date];
+  double loadStartTime = self.startRequestTime.timeIntervalSince1970 * 1000;  // ms
+  double loadFinishTime = completeRequestTime.timeIntervalSince1970 * 1000;   // ms
+
+  reportInfo[@"load_start"] = [NSNumber numberWithDouble:loadStartTime];
+  reportInfo[@"load_finish"] = [NSNumber numberWithDouble:loadFinishTime];
+  reportInfo[@"cost"] = [NSNumber
+      numberWithDouble:[completeRequestTime timeIntervalSinceDate:self.startRequestTime]];  // ms
+  reportInfo[@"src"] = reportUrl.url.absoluteString ?: @"";
+  reportInfo[@"origin"] = [NSNumber numberWithInteger:origin];
+  reportInfo[@"width"] = @(self.image.size.width);
+  reportInfo[@"height"] = @(self.image.size.height);
+  reportInfo[@"memory_cost"] = @(reportUrl.memoryCost) ?: @"";
+  return reportInfo;
 }
 
 - (void)addReportInfo:(LynxURL*)reportUrl {
@@ -1343,6 +1403,21 @@ LYNX_PROP_SETTER("extra-load-info", setBindLoadExtraInfo, BOOL) {
     value = NO;
   }
   _enableExtraLoadInfo = value;
+}
+
+/**
+ * @name: enable-report-info
+ * @description:  If enabled, the loading callback will include additional information, which may
+ *negatively impact performance. It is recommended to use this feature in DEBUG mode.
+ * @category: different
+ * @standardAction: keep
+ * @supportVersion: 3.5
+ **/
+LYNX_PROP_SETTER("enable-report-info", setEnableReportInfo, BOOL) {
+  if (requestReset) {
+    value = NO;
+  }
+  _enableReportInfo = value;
 }
 
 /**
