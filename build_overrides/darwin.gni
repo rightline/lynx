@@ -95,12 +95,18 @@ JSDebug_deps = rebase_path(
           "../devtool/lynx_devtool/js_debug:devtool_quickjs_debug",
           "../devtool/lynx_devtool/js_debug/:devtool_lepus_debug_sources",
           "../third_party/httplib",
+
+          # "../third_party/boringssl",
+          # "../third_party/boringssl:crypto",
+          # "../third_party/boringssl:ssl",
+          # "//third_party/zlib",
         ])
 
 js_debug_dependency = [
   "PrimJS/quickjs_debugger",
   "PrimJS/quickjs_heapprofiler",
   "PrimJS/quickjs_profiler",
+  "BoringSSL",
 ]
 
 build_devtool_resources_command = [

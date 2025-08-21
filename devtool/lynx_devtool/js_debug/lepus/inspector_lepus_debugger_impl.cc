@@ -14,7 +14,7 @@ namespace devtool {
 
 namespace {
 
-void SplitUrl(const std::string &url, std::string &host, std::string &path) {
+void SplitUrl(std::string url, std::string &host, std::string &path) {
   size_t protocol_end = url.find("://");
   size_t pos = 0;
   if (protocol_end != std::string::npos) {
@@ -23,15 +23,17 @@ void SplitUrl(const std::string &url, std::string &host, std::string &path) {
     size_t single_slash_pos = url.find(":/");
     if (single_slash_pos != std::string::npos) {
       pos = single_slash_pos + 2;
+      url = url.substr(0, pos) + '/' + url.substr(pos);
+      pos++;
     }
   }
 
   size_t path_start = url.find('/', pos);
   if (path_start != std::string::npos) {
-    host = url.substr(pos, path_start - pos);
+    host = url.substr(0, path_start);
     path = url.substr(path_start);
   } else {
-    host = url.substr(pos);
+    host = url;
     path = "/";
   }
 }
@@ -87,6 +89,7 @@ std::string InspectorLepusDebuggerImpl::GetDebugInfo(const std::string &url) {
     client.set_max_timeout(timeout_sec * 1000);
     client.set_connection_timeout(timeout_sec);
     client.set_read_timeout(timeout_sec);
+    client.enable_server_certificate_verification(false);
 
     // Since httplib calls `CFRunLoopRunInMode()` during downloading (see
     // `getaddrinfo_with_timeout()`), which can cause subsequent tasks to be

@@ -273,6 +273,9 @@ subspec_target("js_debug") {
       "ENABLE_QUICKJS_DEBUGGER",
       "LYNX_DEV",
       "LYNX_SIMPLIFY=0",
+      "CPPHTTPLIB_NO_EXCEPTIONS",
+      "CPPHTTPLIB_ZLIB_SUPPORT",
+      "CPPHTTPLIB_OPENSSL_SUPPORT",
     ]
     HEADER_SEARCH_PATHS = Devtool_Native_includes
   }

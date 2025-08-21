@@ -2,10 +2,23 @@
 # Licensed under the Apache License Version 2.0 that can be found in the
 # LICENSE file in the root directory of this source tree.
 
+config("httplib_config") {
+  defines = [
+    "CPPHTTPLIB_NO_EXCEPTIONS",
+    "CPPHTTPLIB_ZLIB_SUPPORT",
+    "CPPHTTPLIB_OPENSSL_SUPPORT",
+  ]
+}
+
 source_set("httplib") {
   sources = [
     "httplib.cc",
     "httplib.h",
+  ]
+
+  public_deps = [
+    "../boringssl",
+    "//third_party/zlib",
   ]
 
   if (is_linux) {
@@ -16,5 +29,5 @@ source_set("httplib") {
     ]
   }
 
-  defines = [ "CPPHTTPLIB_NO_EXCEPTIONS" ]
+  public_configs = [ ":httplib_config" ]
 }
