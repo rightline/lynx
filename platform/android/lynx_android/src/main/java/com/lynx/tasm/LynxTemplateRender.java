@@ -5,6 +5,7 @@
 package com.lynx.tasm;
 
 import static android.view.View.MeasureSpec;
+import static com.lynx.tasm.eventreport.LynxEventReporter.PROP_NAME_EMBEDDED_MODE;
 
 import android.app.Activity;
 import android.content.Context;
@@ -675,7 +676,7 @@ public class LynxTemplateRender
   public void putExtraParamsForReportingEvents(final Map<String, Object> params) {
     String eventName = "LynxTemplateRender.putExtraParamsForReportEvents";
     onTraceEventBegin(eventName);
-    if (mLynxContext != null && mLynxContext.enableEventReporter()) {
+    if (mLynxContext != null) {
       int instanceId = mLynxContext.getInstanceId();
       LynxEventReporter.putExtraParams(params, instanceId);
     }
@@ -748,7 +749,7 @@ public class LynxTemplateRender
       }
       int lastInstanceId = LynxEventReporter.INSTANCE_ID_UNKNOWN;
       if (mNativePtr != 0) {
-        if (mLynxContext != null && mLynxContext.enableEventReporter()) {
+        if (mLynxContext != null) {
           lastInstanceId = mLynxContext.getInstanceId();
           LynxEventReporter.removeGenericInfo(lastInstanceId);
         }
@@ -901,7 +902,7 @@ public class LynxTemplateRender
       mClientV2.setInstanceId(mLynxContext.getInstanceId());
     }
 
-    if (mLynxContext != null && mLynxContext.enableEventReporter()) {
+    if (mLynxContext != null) {
       LynxEventReporter.updateGenericInfo(LynxEventReporter.PROP_NAME_THREAD_MODE,
           mThreadStrategyForRendering.id(), mLynxContext.getInstanceId());
       LynxEventReporter.moveExtraParams(lastInstanceId, mLynxContext.getInstanceId());
@@ -1342,7 +1343,7 @@ public class LynxTemplateRender
   }
 
   private void updateGenericInfoURL(String url) {
-    if (mLynxContext == null || !mLynxContext.enableEventReporter()) {
+    if (mLynxContext == null) {
       return;
     }
     if (url != null) {
@@ -1572,6 +1573,7 @@ public class LynxTemplateRender
           updateViewport(getLynxView().getCurrentWidthMeasureSpec(),
               getLynxView().getCurrentHeightMeasureSpec(), false);
         }
+        updateGenericInfoURL(mUrl);
         dispatchOnPageStart(mUrl);
         updateData(data, true);
         onTraceEventEnd(eventName);
@@ -1584,6 +1586,7 @@ public class LynxTemplateRender
         updateViewport(getLynxView().getCurrentWidthMeasureSpec(),
             getLynxView().getCurrentHeightMeasureSpec(), false);
       }
+      updateGenericInfoURL(mUrl);
       dispatchOnPageStart(mUrl);
       updateData(data, true);
       onTraceEventEnd(eventName);
@@ -2281,7 +2284,7 @@ public class LynxTemplateRender
     }
     if (mNativePtr != 0) {
       // remove generic info of template instance before destroy.
-      if (mLynxContext != null && mLynxContext.enableEventReporter()) {
+      if (mLynxContext != null) {
         LynxEventReporter.clearCache(mLynxContext.getInstanceId());
       }
       destroyLynxEngine();
@@ -2300,8 +2303,12 @@ public class LynxTemplateRender
       return;
     }
     mHasPageStart = true;
-    if (mLynxContext != null && mLynxContext.enableEventReporter()) {
-      LynxEventReporter.onEvent(EVENT_NAME_LYNX_OPEN_PAGE, null, mLynxContext.getInstanceId());
+    if (mLynxContext != null) {
+      LynxEventReporter.onEvent(EVENT_NAME_LYNX_OPEN_PAGE, mLynxContext.getInstanceId(), () -> {
+        Map<String, Object> data = new HashMap<>();
+        data.put(PROP_NAME_EMBEDDED_MODE, mLynxContext.embeddedModeValue());
+        return data;
+      });
     }
     TraceEvent.instant(TraceEvent.CATEGORY_VITALS, TraceEventDef.TEMPLATE_RENDER_START_LOAD);
 
@@ -3385,7 +3392,7 @@ public class LynxTemplateRender
   private void onThreadStrategyUpdated() {
     mAsyncRender = (mThreadStrategyForRendering == ThreadStrategyForRendering.MULTI_THREADS
         || mThreadStrategyForRendering == ThreadStrategyForRendering.MOST_ON_TASM);
-    if (mLynxContext != null && mLynxContext.enableEventReporter()) {
+    if (mLynxContext != null) {
       LynxEventReporter.updateGenericInfo(LynxEventReporter.PROP_NAME_THREAD_MODE,
           mThreadStrategyForRendering.id(), mLynxContext.getInstanceId());
     }
