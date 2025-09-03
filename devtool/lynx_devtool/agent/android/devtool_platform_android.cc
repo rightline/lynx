@@ -483,7 +483,8 @@ std::vector<float> DevToolPlatformAndroid::GetTransformValue(
 void DevToolPlatformAndroid::PageReload(bool ignore_cache,
                                         std::string template_bin,
                                         bool from_template_fragments,
-                                        int32_t template_size) {
+                                        int32_t template_size,
+                                        std::string reload_url) {
   JNIEnv* env = lynx::base::android::AttachCurrentThread();
   lynx::base::android::ScopedLocalJavaRef<jobject> ref(weak_android_delegate_);
   if (ref.IsNull()) {
@@ -491,9 +492,12 @@ void DevToolPlatformAndroid::PageReload(bool ignore_cache,
   }
   auto jni_data = lynx::base::android::JNIConvertHelper::ConvertToJNIStringUTF(
       env, template_bin);
+  auto jni_reload_url =
+      lynx::base::android::JNIConvertHelper::ConvertToJNIStringUTF(env,
+                                                                   reload_url);
   Java_DevToolPlatformAndroidDelegate_pageReload(
       env, ref.Get(), ignore_cache, jni_data.Get(), from_template_fragments,
-      template_size);
+      template_size, jni_reload_url.Get());
 }
 
 void DevToolPlatformAndroid::Navigate(const std::string& url) {

@@ -89,11 +89,13 @@ void InspectorUIExecutor::ScrollIntoView(int node_id) {
 void InspectorUIExecutor::PageReload(bool ignore_cache,
                                      std::string template_binary,
                                      bool from_template_fragments,
-                                     int32_t template_size) {
+                                     int32_t template_size,
+                                     std::string reload_url) {
   CHECK_NULL_AND_LOG_RETURN(devtool_platform_facade_,
                             "devtool_platform_facade_ is null");
   devtool_platform_facade_->PageReload(ignore_cache, std::move(template_binary),
-                                       from_template_fragments, template_size);
+                                       from_template_fragments, template_size,
+                                       reload_url);
 }
 
 void InspectorUIExecutor::StartScreencast(
@@ -225,15 +227,17 @@ void InspectorUIExecutor::PageReload(
   std::string template_bin = "";
   bool from_template_fragments = false;
   int32_t template_size = 0;
+  std::string reload_url = "";
   if (!params.empty()) {
     ignore_cache = params["ignoreCache"].asBool();
     template_bin = params["pageData"].asString();
     from_template_fragments = params["fromPageDataFragments"].asBool();
     template_size = params["pageDataLength"].asInt();
+    reload_url = params["url"].asString();
   }
 
   PageReload(ignore_cache, std::move(template_bin), from_template_fragments,
-             template_size);
+             template_size, reload_url);
   response["result"] = content;
   response["id"] = message["id"].asInt64();
   sender->SendMessage("CDP", response);

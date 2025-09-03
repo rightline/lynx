@@ -47,7 +47,9 @@ class DevtoolPlatformEmbedder
   void OnLoadTemplate(const std::string& url, const std::vector<uint8_t>& tem,
                       const std::shared_ptr<tasm::TemplateData>& init_data);
 
-  void Reload(bool ignore_cache);
+  void Reload(bool ignore_cache, std::string template_binary = "",
+              bool from_template_fragments = false, int32_t template_size = 0,
+              std::string reload_url = "");
 
   void Navigate(const std::string& url);
 

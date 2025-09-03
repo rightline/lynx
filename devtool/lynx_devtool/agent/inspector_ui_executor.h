@@ -83,7 +83,7 @@ class InspectorUIExecutor
   void ScrollIntoView(int node_id);
   void PageReload(bool ignore_cache, std::string template_binary = "",
                   bool from_template_fragments = false,
-                  int32_t template_size = 0);
+                  int32_t template_size = 0, std::string reload_url = "");
 
  public:
   void OnLayoutNodeCreated(int32_t id, tasm::LayoutNode* ptr);

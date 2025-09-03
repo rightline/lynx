@@ -102,10 +102,12 @@ class DevtoolPlatformImpl : public lynx::devtool::DevToolPlatformFacade {
 
   void PageReload(bool ignore_cache, std::string template_binary = "",
                   bool from_template_fragments = false,
-                  int32_t template_size = 0) override {
+                  int32_t template_size = 0,
+                  std::string reload_url = "") override {
     auto embedder = weak_embedder_.lock();
     CHECK_NULL_AND_LOG_RETURN(embedder, "embedder is null");
-    embedder->Reload(ignore_cache);
+    embedder->Reload(ignore_cache, template_binary, from_template_fragments,
+                     template_size, reload_url);
   }
 
   void Navigate(const std::string& url) override {
@@ -172,9 +174,14 @@ void DevtoolPlatformEmbedder::OnLoadTemplate(
   reload_helper_->OnLoadTemplate(url, tem, init_data);
 }
 
-void DevtoolPlatformEmbedder::Reload(bool ignore_cache) {
+void DevtoolPlatformEmbedder::Reload(bool ignore_cache,
+                                     std::string template_binary,
+                                     bool from_template_fragments,
+                                     int32_t template_size,
+                                     std::string reload_url) {
   CHECK_NULL_AND_LOG_RETURN(reload_helper_, "reload_helper_ is null");
-  reload_helper_->Reload(ignore_cache);
+  reload_helper_->Reload(ignore_cache, template_binary, from_template_fragments,
+                         template_size, reload_url);
 }
 
 void DevtoolPlatformEmbedder::Navigate(const std::string& url) {

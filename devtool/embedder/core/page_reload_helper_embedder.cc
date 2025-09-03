@@ -26,7 +26,11 @@ void PageReloadHelperEmbedder::OnLoadTemplate(
 
 std::string PageReloadHelperEmbedder::GetURL() { return url_; }
 
-void PageReloadHelperEmbedder::Reload(bool ignore_cache) {
+void PageReloadHelperEmbedder::Reload(bool ignore_cache,
+                                      std::string template_binary,
+                                      bool from_template_fragments,
+                                      int32_t template_size,
+                                      std::string reload_url) {
   lynx::base::UIThread::GetRunner()->PostTask(
       [proxy = proxy_, url = url_, binary = binary_, init_data = init_data_] {
         if (proxy != nullptr) {

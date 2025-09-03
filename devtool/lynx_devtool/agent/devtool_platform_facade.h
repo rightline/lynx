@@ -47,7 +47,8 @@ class DevToolPlatformFacade
   virtual void StopScreenCast() = 0;
   virtual void PageReload(bool ignore_cache, std::string template_binary = "",
                           bool from_template_fragments = false,
-                          int32_t template_size = 0) = 0;
+                          int32_t template_size = 0,
+                          std::string reload_url = "") = 0;
   virtual void Navigate(const std::string& url) = 0;
   virtual void OnAckReceived() = 0;
   virtual void GetLynxScreenShot() = 0;
