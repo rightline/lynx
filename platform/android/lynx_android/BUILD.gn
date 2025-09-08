@@ -23,6 +23,7 @@ cmake_target("lynx_android") {
   deps = [
     ":lynx_android_lib",
     ":lynx_jni_files",
+    "../../../base/platform/android:LynxBase",
     "../../../base/trace/android:LynxTrace",
     "../../../core/build:build",
     "../../../core/shell:shell",
@@ -39,7 +40,6 @@ cmake_target("lynx_android") {
 
 group("lynx_android_lib") {
   public_deps = [
-    "../../../base/src:base",
     "../../../core/animation:animation",
     "../../../core/animation/basic_animation:basic_animation",
     "../../../core/animation/lynx_basic_animator:lynx_basic_animator",
