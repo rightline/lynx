@@ -2947,7 +2947,9 @@ bool CSSStringParser::ParseVarReference(VarReference &ref) {
   Advance();
   SkipWhitespaceToken();
   if (current_token_.IsIdent()) {
-    ref.name = std::string_view(current_token_.start, current_token_.length);
+    // Record the position of the variable name in the original string
+    ref.name_start = current_token_.start - scanner_.content();
+    ref.name_end = ref.name_start + current_token_.length;
     Advance();
   } else {
     return false;  // Invalid variable name
@@ -2959,7 +2961,7 @@ bool CSSStringParser::ParseVarReference(VarReference &ref) {
     while (!Check(TokenType::TOKEN_EOF)) {
       Advance();
     }
-    ref.fallback = std::string_view(
+    ref.fallback = base::String(
         fallback_start,
         (current_token_.start + current_token_.length) - fallback_start);
   }
