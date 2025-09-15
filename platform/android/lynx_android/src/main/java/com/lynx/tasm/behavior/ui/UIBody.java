@@ -325,13 +325,13 @@ public class UIBody extends UIGroup<UIBodyView> {
   }
 
   @Override
-  public boolean eventThrough() {
+  public boolean eventThrough(float x, float y) {
     // If <page event-through={true}/>, the res will be true.
     // Otherwise the res will be false, then check PageConfig enableEventThrough. If PageConfig
     // enableEventThrough == true, let the res be true. In other words, when
     // config.enableEventThrough == true or page.event-through == true, rootUI's eventThrough will
     // be true.
-    boolean res = super.eventThrough();
+    boolean res = super.eventThrough(x, y);
     if (!res) {
       res |= mContext.enableEventThrough();
     }

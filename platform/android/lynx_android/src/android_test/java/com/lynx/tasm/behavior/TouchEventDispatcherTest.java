@@ -181,7 +181,7 @@ public class TouchEventDispatcherTest {
     }
 
     @Override
-    public boolean eventThrough() {
+    public boolean eventThrough(float x, float y) {
       return true;
     }
 
@@ -365,12 +365,12 @@ public class TouchEventDispatcherTest {
     mRootUI.insertChild(parentUI, 0);
     UIView childUI = new UIView(mContext);
     parentUI.insertChild(childUI, 0);
-    assertFalse(childUI.eventThrough());
+    assertFalse(childUI.eventThrough(0, 0));
     JavaOnlyArray array = new JavaOnlyArray();
     array.pushBoolean(true);
     DynamicFromArray param = new DynamicFromArray(array, 0);
     parentUI.setEventThrough(param);
-    assertTrue(childUI.eventThrough());
+    assertTrue(childUI.eventThrough(0, 0));
   }
 
   @Test

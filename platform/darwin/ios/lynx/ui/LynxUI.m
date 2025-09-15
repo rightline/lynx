@@ -2776,16 +2776,16 @@ LYNX_PROP_DEFINE("event-through-active-regions", setEventThroughActiveRegions, N
     return;
   }
   // Supports two types: `30px` and `50%`
-  NSMutableArray<NSArray<LynxSizeValue*>*>* eventThroughActiveRegions = [NSMutableArray array];
+  NSMutableArray<NSArray<LynxSizeValue*>*>* regions = [NSMutableArray array];
   [value enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL* _Nonnull stop) {
     if ([obj isKindOfClass:[NSArray class]] && [(NSArray*)obj count] == 4) {
-      NSArray* area = obj;
-      LynxSizeValue* x = [LynxSizeValue sizeValueFromCSSString:area[0]];
-      LynxSizeValue* y = [LynxSizeValue sizeValueFromCSSString:area[1]];
-      LynxSizeValue* w = [LynxSizeValue sizeValueFromCSSString:area[2]];
-      LynxSizeValue* h = [LynxSizeValue sizeValueFromCSSString:area[3]];
+      NSArray* region = obj;
+      LynxSizeValue* x = [LynxSizeValue sizeValueFromCSSString:region[0]];
+      LynxSizeValue* y = [LynxSizeValue sizeValueFromCSSString:region[1]];
+      LynxSizeValue* w = [LynxSizeValue sizeValueFromCSSString:region[2]];
+      LynxSizeValue* h = [LynxSizeValue sizeValueFromCSSString:region[3]];
       if (x && y && w && h) {
-        [eventThroughActiveRegions addObject:@[ x, y, w, h ]];
+        [regions addObject:@[ x, y, w, h ]];
       } else {
         LLogWarn(@"event-through-active-regions: %luth type err", (unsigned long)idx);
       }
@@ -2793,8 +2793,8 @@ LYNX_PROP_DEFINE("event-through-active-regions", setEventThroughActiveRegions, N
       LLogWarn(@"event-through-active-regions: %luth type err, size != 4", (unsigned long)idx);
     }
   }];
-  if ([eventThroughActiveRegions count] > 0) {
-    _eventThroughActiveRegions = [eventThroughActiveRegions copy];
+  if ([regions count] > 0) {
+    _eventThroughActiveRegions = [regions copy];
   } else {
     LLogWarn(@"event-through-active-regions: empty regions");
   }
@@ -3550,10 +3550,6 @@ LYNX_PROP_DEFINE("ios-background-shape-layer", setUseBackgroundShapeLayer, BOOL)
 
   id<LynxEventTarget> parent = [self parentTarget];
   if (parent != nil) {
-    // when parent is root ui, return false.
-    if ([parent isKindOfClass:[LynxRootUI class]]) {
-      return NO;
-    }
     return [parent ignoreFocus];
   }
   return NO;
